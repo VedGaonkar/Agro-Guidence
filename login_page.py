@@ -1,10 +1,10 @@
 """
-login_page.py — Login & Sign-Up UI for Agro Guidance
-Renders a beautiful authentication page using Streamlit.
+login_page.py — Welcome / Name Entry UI for Agro Guidance
+Renders a beautiful welcome screen where the user enters their name and starts.
 """
 
 import streamlit as st
-from auth import register_user, login_user
+from auth import start_session
 
 
 def _inject_styles():
@@ -37,21 +37,21 @@ def _inject_styles():
         /* ── Logo / hero section ── */
         .auth-hero {
             text-align: center;
-            padding: 2.5rem 0 1.5rem;
+            padding: 3.5rem 0 1.5rem;
         }
         .auth-hero .logo-icon {
-            font-size: 3.5rem;
+            font-size: 4rem;
             display: block;
-            margin-bottom: 0.4rem;
-            filter: drop-shadow(0 0 18px rgba(74, 222, 128, 0.55));
+            margin-bottom: 0.6rem;
+            filter: drop-shadow(0 0 22px rgba(74, 222, 128, 0.6));
             animation: float 3s ease-in-out infinite;
         }
         @keyframes float {
             0%, 100% { transform: translateY(0); }
-            50%       { transform: translateY(-7px); }
+            50%       { transform: translateY(-8px); }
         }
         .auth-hero h1 {
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: 700;
             background: linear-gradient(135deg, #4ade80 0%, #22c55e 50%, #86efac 100%);
             -webkit-background-clip: text;
@@ -60,8 +60,8 @@ def _inject_styles():
         }
         .auth-hero p {
             color: #6b7280;
-            font-size: 0.9rem;
-            margin-top: 0.3rem;
+            font-size: 0.95rem;
+            margin-top: 0.4rem;
         }
 
         /* ── Card ── */
@@ -69,7 +69,7 @@ def _inject_styles():
             background: rgba(15, 30, 20, 0.85);
             border: 1px solid rgba(74, 222, 128, 0.18);
             border-radius: 20px;
-            padding: 2rem 2rem 1.5rem;
+            padding: 2.5rem 2rem 2rem;
             box-shadow:
                 0 25px 50px rgba(0, 0, 0, 0.5),
                 inset 0 1px 0 rgba(74, 222, 128, 0.08);
@@ -77,32 +77,21 @@ def _inject_styles():
             margin-bottom: 1.5rem;
         }
 
-        /* ── Tab switcher ── */
-        .tab-switcher {
-            display: flex;
-            background: rgba(0, 0, 0, 0.35);
-            border-radius: 12px;
-            padding: 4px;
-            margin-bottom: 1.6rem;
-            gap: 4px;
-        }
-        .tab-btn {
-            flex: 1;
-            text-align: center;
-            padding: 0.55rem 0;
-            border-radius: 9px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.25s ease;
+        /* ── Welcome label ── */
+        .welcome-label {
             color: #9ca3af;
-            border: none;
-            background: transparent;
+            font-size: 0.78rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin: 0 0 0.5rem;
+            text-align: center;
         }
-        .tab-btn.active {
-            background: linear-gradient(135deg, #16a34a, #15803d);
-            color: #ffffff;
-            box-shadow: 0 3px 10px rgba(22, 163, 74, 0.4);
+        .welcome-sub {
+            color: #4b5563;
+            font-size: 0.85rem;
+            text-align: center;
+            margin: 0 0 1.5rem;
         }
 
         /* ── Input fields ── */
@@ -111,8 +100,8 @@ def _inject_styles():
             border: 1px solid rgba(74, 222, 128, 0.2) !important;
             border-radius: 10px !important;
             color: #e5e7eb !important;
-            font-size: 0.9rem !important;
-            padding: 0.65rem 0.9rem !important;
+            font-size: 1rem !important;
+            padding: 0.75rem 1rem !important;
             transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
         }
         .stTextInput > div > div > input:focus {
@@ -138,14 +127,14 @@ def _inject_styles():
             color: #ffffff !important;
             border: none !important;
             border-radius: 12px !important;
-            padding: 0.75rem 1.5rem !important;
-            font-size: 0.95rem !important;
+            padding: 0.8rem 1.5rem !important;
+            font-size: 1rem !important;
             font-weight: 600 !important;
-            letter-spacing: 0.02em !important;
+            letter-spacing: 0.03em !important;
             cursor: pointer !important;
             transition: all 0.25s ease !important;
             box-shadow: 0 4px 15px rgba(22, 163, 74, 0.35) !important;
-            margin-top: 0.5rem !important;
+            margin-top: 0.8rem !important;
         }
         .stButton > button:hover {
             transform: translateY(-2px) !important;
@@ -153,20 +142,37 @@ def _inject_styles():
         }
         .stButton > button:active { transform: translateY(0) !important; }
 
+        /* ── Selectbox (language picker) ── */
+        .stSelectbox > div > div {
+            background-color: rgba(0, 0, 0, 0.4) !important;
+            border: 1px solid rgba(74, 222, 128, 0.2) !important;
+            border-radius: 10px !important;
+            color: #e5e7eb !important;
+            font-size: 0.95rem !important;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+        }
+        .stSelectbox > div > div:focus-within {
+            border-color: rgba(74, 222, 128, 0.6) !important;
+            box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.12) !important;
+        }
+        .stSelectbox > label {
+            color: #9ca3af !important;
+            font-size: 0.8rem !important;
+            font-weight: 500 !important;
+            letter-spacing: 0.02em !important;
+            text-transform: uppercase !important;
+        }
+        [data-baseweb="select"] { background-color: transparent !important; }
+        [data-baseweb="popover"] {
+            background-color: #0f1e14 !important;
+            border: 1px solid rgba(74, 222, 128, 0.2) !important;
+            border-radius: 10px !important;
+        }
+
         /* ── Alerts ── */
         .stSuccess, .stError, .stWarning {
             border-radius: 10px !important;
             font-size: 0.875rem !important;
-        }
-
-        /* ── Divider label ── */
-        .section-label {
-            color: #6b7280;
-            font-size: 0.72rem;
-            font-weight: 600;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            margin: 0.2rem 0 0.7rem;
         }
 
         /* ── Footer note ── */
@@ -183,7 +189,7 @@ def _inject_styles():
 
 
 def show_login_page():
-    """Render the full authentication page (login + sign-up)."""
+    """Render the welcome / name-entry page."""
     _inject_styles()
 
     # ── Hero ──────────────────────────────────────────────
@@ -198,78 +204,61 @@ def show_login_page():
         unsafe_allow_html=True,
     )
 
-    # ── Tab state ─────────────────────────────────────────
-    if "auth_tab" not in st.session_state:
-        st.session_state.auth_tab = "login"
-
     # ── Card start ────────────────────────────────────────
     st.markdown('<div class="auth-container"><div class="auth-card">', unsafe_allow_html=True)
 
-    # Tab switcher using Streamlit radio (styled)
-    col_login, col_signup = st.columns(2)
-    with col_login:
-        if st.button("🔑  Sign In", key="tab_login_btn", use_container_width=True):
-            st.session_state.auth_tab = "login"
-    with col_signup:
-        if st.button("✨  Sign Up", key="tab_signup_btn", use_container_width=True):
-            st.session_state.auth_tab = "signup"
+    from translations import t
 
-    st.divider()
+    # ── Indian language options ───────────────────────────
+    LANGUAGES = {
+        "🇮🇳 हिन्दी (Hindi)":       "Hindi",
+        "🇮🇳 मराठी (Marathi)":      "Marathi",
+        "🇮🇳 தமிழ் (Tamil)":        "Tamil",
+        "🇮🇳 తెలుగు (Telugu)":      "Telugu",
+        "🇮🇳 ಕನ್ನಡ (Kannada)":      "Kannada",
+        "🇮🇳 മലയാളം (Malayalam)":  "Malayalam",
+        "🇮🇳 বাংলা (Bengali)":      "Bengali",
+        "🇮🇳 ગુજરાતી (Gujarati)":  "Gujarati",
+        "🇮🇳 ਪੰਜਾਬੀ (Punjabi)":    "Punjabi",
+        "🇮🇳 ଓଡ଼ିଆ (Odia)":         "Odia",
+        "🇮🇳 অসমীয়া (Assamese)":   "Assamese",
+        "🇮🇳 اردو (Urdu)":          "Urdu",
+        "🇮🇳 कोंकणी (Konkani)":     "Konkani",
+        "🇮🇳 মণিপুরি (Manipuri)":   "Manipuri",
+        "🇬🇧 English":              "English",
+    }
 
-    # ── LOGIN FORM ────────────────────────────────────────
-    if st.session_state.auth_tab == "login":
-        st.markdown('<p class="section-label">Sign in to your account</p>', unsafe_allow_html=True)
+    # Put language selector outside the form so it triggers a rerun immediately!
+    selected_display = st.selectbox(
+        t("Preferred Language"),
+        options=list(LANGUAGES.keys()),
+        index=0,
+        key="entry_language",
+    )
+    
+    st.session_state.language = LANGUAGES[selected_display]
 
-        with st.form("login_form", clear_on_submit=False):
-            username = st.text_input("Username", placeholder="Enter your username", key="login_username")
-            password = st.text_input("Password", placeholder="Enter your password", type="password", key="login_password")
-            submitted = st.form_submit_button("Sign In →")
+    st.markdown(f'<p class="welcome-label">👋 {t("Welcome")}!</p>', unsafe_allow_html=True)
+    st.markdown(f'<p class="welcome-sub">{t("Choose your language & enter your name to get started")}</p>', unsafe_allow_html=True)
 
-        if submitted:
-            if not username or not password:
-                st.error("Please fill in all fields.")
-            else:
-                with st.spinner("Verifying credentials…"):
-                    result = login_user(username, password)
+    with st.form("name_form", clear_on_submit=False):
+        name = st.text_input(t("Your Name"), placeholder=t("e.g. Ravi Sharma"), key="entry_name")
+        submitted = st.form_submit_button(f"🌾  {t('Start Exploring')} →")
 
-                if result["success"]:
-                    st.session_state.logged_in = True
-                    st.session_state.current_user = result["user"]
-                    st.success(f"Welcome back, {result['user']['first_name']}! 🌾")
-                    st.rerun()
-                else:
-                    st.error(result["message"])
-
-    # ── SIGN-UP FORM ──────────────────────────────────────
-    else:
-        st.markdown('<p class="section-label">Create a new account</p>', unsafe_allow_html=True)
-
-        with st.form("signup_form", clear_on_submit=True):
-            col1, col2 = st.columns(2)
-            with col1:
-                first_name = st.text_input("First Name", placeholder="Ravi", key="su_first")
-            with col2:
-                last_name = st.text_input("Last Name", placeholder="Sharma", key="su_last")
-
-            username  = st.text_input("Username", placeholder="ravi_farmer", key="su_username")
-            email     = st.text_input("Email", placeholder="ravi@example.com", key="su_email")
-            password  = st.text_input("Password", placeholder="Min. 6 characters", type="password", key="su_password")
-            submitted = st.form_submit_button("Create Account →")
-
-        if submitted:
-            with st.spinner("Creating your account…"):
-                result = register_user(first_name, last_name, username, email, password)
-
-            if result["success"]:
-                st.success(result["message"])
-                st.session_state.auth_tab = "login"
-                st.rerun()
-            else:
-                st.error(result["message"])
+    if submitted:
+        result = start_session(name)
+        if result["success"]:
+            st.session_state.logged_in = True
+            st.session_state.current_user = result["user"]
+            st.success(f"{t('Welcome')}, {result['user']['name']}! {t('Let us grow together')} 🌿")
+            st.rerun()
+        else:
+            st.error(t(result["message"]))
 
     st.markdown('</div></div>', unsafe_allow_html=True)
 
     st.markdown(
-        '<div class="auth-footer">🌿 Agro Guidance · Empowering Farmers with Technology</div>',
+        f'<div class="auth-footer">🌿 Agro Guidance · {t("Empowering Farmers with Technology")}</div>',
         unsafe_allow_html=True,
     )
+
